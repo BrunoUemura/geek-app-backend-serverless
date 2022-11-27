@@ -61,6 +61,12 @@ export default function (request: VercelRequest, response: VercelResponse) {
       await database.disconnect();
       return result;
     }
+
+    return handleResponse(
+      HTTP_STATUS_CODES.NOT_FOUND,
+      `Requested http method [${request.method}] not available`,
+      response
+    );
   }
 
   return { handle };
