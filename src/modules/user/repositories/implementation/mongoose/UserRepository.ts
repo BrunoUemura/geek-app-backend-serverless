@@ -1,4 +1,4 @@
-import { database } from "../../../../../infra/db/mongodb/connection";
+import { database } from "../../../../../infra/db/mongoose/connection";
 import { User } from "../../../entities/User";
 import { IUserRepository } from "../../../interfaces/IUserRepository";
 import { IUser, IUserCreate } from "../../../interfaces/IUser";
