@@ -1,29 +1,21 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
-import { database } from '../../../../../infra/db/prisma/connection';
 import {
   IListItem,
   IListItemCreate,
   IListItemUpdate,
-} from '../../../interfaces/IListItem';
-import { IListItemRepository } from '../../../interfaces/IListItemRepository';
+} from "../../../interfaces/IListItem";
+import { IListItemRepository } from "../../../interfaces/IListItemRepository";
 
 const prisma = new PrismaClient().listItem;
 
-export class ListItemRepository implements IListItemRepository {
-  async findById(id: string): Promise<IListItem> {
-    await database.connect();
-
-    const list = await prisma.findFirst({ where: { id } });
-
-    await database.disconnect();
-    return list;
+export default function (): IListItemRepository {
+  async function findById(id: string): Promise<IListItem | null> {
+    return prisma.findFirst({ where: { id } });
   }
 
-  async create(data: IListItemCreate): Promise<IListItem> {
-    await database.connect();
-
-    const list = await prisma.create({
+  async function create(data: IListItemCreate): Promise<IListItem> {
+    return prisma.create({
       data: {
         id: data.id,
         listId: data.listId,
@@ -36,16 +28,11 @@ export class ListItemRepository implements IListItemRepository {
       },
       include: { list: true },
     });
-
-    await database.disconnect();
-    return list;
   }
 
-  async update(id: string, data: IListItemUpdate): Promise<IListItem> {
-    await database.connect();
-
-    const list = await prisma.update({
-      where: { id: id },
+  async function update(data: IListItemUpdate): Promise<IListItem> {
+    return prisma.update({
+      where: { id: data.id },
       data: {
         title: data.title,
         season: data.season,
@@ -56,17 +43,16 @@ export class ListItemRepository implements IListItemRepository {
       },
       include: { list: true },
     });
-
-    await database.disconnect();
-    return list;
   }
 
-  async delete(id: string): Promise<IListItem> {
-    await database.connect();
-
-    const list = await prisma.delete({ where: { id } });
-
-    await database.disconnect();
-    return list;
+  async function deleteById(id: string): Promise<IListItem> {
+    return prisma.delete({ where: { id } });
   }
+
+  return {
+    findById,
+    create,
+    update,
+    deleteById,
+  };
 }

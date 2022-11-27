@@ -1,3 +1,2 @@
-import { ListRepository } from './implementation/prisma/ListRepository';
-
-export const listRepository = ListRepository;
+import { ListRepository } from "./implementation/prisma/ListRepository";
+export { ListRepository };

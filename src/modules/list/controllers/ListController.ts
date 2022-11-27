@@ -1,13 +1,13 @@
 import { VercelRequest, VercelRequestBody, VercelResponse } from "@vercel/node";
 
-import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
-import { handleResponse } from "../../../shared/handleResponse";
-import { ListRepository } from "../repositories/implementation/prisma/ListRepository";
 import FindAllListService from "../services/FindAllListService";
 import CreateListService from "../services/CreateListService";
+import { ListRepository } from "../repositories";
+import { UserRepository } from "../../user/repositories";
+import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
+import { handleResponse } from "../../../shared/handleResponse";
 import { handleError } from "../../../shared/errors/handleError";
 import { database } from "../../../infra/db/prisma/connection";
-import { UserRepository } from "../../user/repositories";
 
 export default function (request: VercelRequest, response: VercelResponse) {
   const listRepository = ListRepository();

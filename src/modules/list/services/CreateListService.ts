@@ -5,6 +5,7 @@ import { AppError } from "../../../shared/errors/AppError";
 import { generateUniqueId } from "../../../shared/functions";
 import { IListRepository } from "../interfaces/IListRepository";
 import { IUserRepository } from "../../user/interfaces/IUserRepository";
+import { CONTEXT_ABBREVIATION } from "../../../shared/constants/contextsAbbreviation";
 
 interface ICreateListServiceProps extends Omit<IListCreate, "id"> {}
 
@@ -28,7 +29,7 @@ export default function (
 
     logger.info(`[Service]: Associated user found`);
     logger.info(`[Service]: Creating List`);
-    const id = generateUniqueId("LIST");
+    const id = generateUniqueId(CONTEXT_ABBREVIATION.LIST);
     const listToCreate = {
       id,
       userId,

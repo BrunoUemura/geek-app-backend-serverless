@@ -1,42 +1,30 @@
-import { logger } from '../../../shared/logger';
-import { httpStatusCodes } from '../../../shared/constants/httpStatusCodes';
-import { AppError } from '../../../shared/errors/AppError';
-import { IListUpdate } from '../interfaces/IList';
-import { ListRepository } from '../repositories/implementation/prisma/ListRepository';
-import { RedisCache } from '../../../shared/cache/RedisCache';
+import { logger } from "../../../shared/logger";
+import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
+import { AppError } from "../../../shared/errors/AppError";
+import { IListUpdate } from "../interfaces/IList";
+import { IListRepository } from "../interfaces/IListRepository";
 
-export class UpdateListService {
-  constructor(private readonly listRepository: ListRepository) {}
+export default function (listRepository: IListRepository) {
+  async function execute({ id, title, description, category }: IListUpdate) {
+    logger.info(`[Service]: Updating list ${id}`);
 
-  async execute({
-    id,
-    title,
-    description,
-    category,
-  }: IListUpdate): Promise<void> {
-    logger.info(`[API]: Updating list`);
-
-    const listKey = process.env.REDIS_LIST_KEY || '';
-    const redisCache = new RedisCache();
-
-    const list = await this.listRepository.findById(id);
+    logger.info(`[Service]: Searching for list ${id}`);
+    const list = await listRepository.findById(id);
     if (!list) {
-      throw new AppError('List not found', httpStatusCodes.NOT_FOUND);
+      throw new AppError(HTTP_STATUS_CODES.NOT_FOUND, "List not found");
     }
 
+    logger.info(`[Service]: Found list`);
+    logger.info(`[Service]: Updating list`);
     const listToUpdate = {
+      id,
       title,
       description,
       category,
     };
 
-    try {
-      await this.listRepository.update(id, listToUpdate);
-      await redisCache.remove(listKey);
-      logger.info('Successfully updated List');
-    } catch (err) {
-      logger.error('Failed to update List');
-      throw new AppError('Unable to update List', httpStatusCodes.NOT_FOUND);
-    }
+    return listRepository.update(listToUpdate);
   }
+
+  return { execute };
 }

@@ -5,7 +5,8 @@ import {
   VercelResponse,
 } from "@vercel/node";
 
-import CreateListItemService from "../services/CreateListItemService";
+import UpdateListItemService from "../services/UpdateListItemService";
+import DeleteListItemService from "../services/DeleteListItemService";
 import { ListItemRepository } from "../repositories";
 import { ListRepository } from "../../list/repositories";
 import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
@@ -15,21 +16,26 @@ import { handleError } from "../../../shared/errors/handleError";
 export default function (request: VercelRequest, response: VercelResponse) {
   const listRepository = ListRepository();
   const listItemRepository = ListItemRepository();
-  const createListItemService = CreateListItemService(
+  const updateListItemService = UpdateListItemService(
+    listRepository,
+    listItemRepository
+  );
+  const deleteListItemService = DeleteListItemService(
     listRepository,
     listItemRepository
   );
 
-  async function create(
+  async function update(
     requestQuery: VercelRequestQuery,
     requestBody: VercelRequestBody
   ) {
-    const { id } = requestQuery;
+    const { id: listId, itemid } = requestQuery;
     const { title, season, episode, chapter, link, image } = requestBody;
 
     try {
-      const result = await createListItemService.execute({
-        listId: String(id),
+      const result = await updateListItemService.execute({
+        listId: String(listId),
+        id: String(itemid),
         title,
         season,
         episode,
@@ -44,9 +50,27 @@ export default function (request: VercelRequest, response: VercelResponse) {
     }
   }
 
+  async function deleteById(requestQuery: VercelRequestQuery) {
+    const { id: listId, itemid } = requestQuery;
+
+    try {
+      const result = await deleteListItemService.execute(
+        String(listId),
+        String(itemid)
+      );
+      return handleResponse(HTTP_STATUS_CODES.OK, result, response);
+    } catch (error: any) {
+      return handleError(error, response);
+    }
+  }
+
   async function handle() {
-    if (request.method === "POST") {
-      return create(request.query, request.body);
+    if (request.method === "PUT") {
+      return update(request.query, request.body);
+    }
+
+    if (request.method === "DELETE") {
+      return deleteById(request.query);
     }
 
     return handleResponse(

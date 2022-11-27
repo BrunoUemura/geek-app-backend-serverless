@@ -1,19 +1,19 @@
-import { logger } from '../../../shared/logger';
-import { httpStatusCodes } from '../../../shared/constants/httpStatusCodes';
-import { AppError } from '../../../shared/errors/AppError';
-import { generateUniqueId } from '../../../shared/functions';
-import { ListRepository } from '../../list/repositories/implementation/prisma/ListRepository';
-import { ListItemRepository } from '../repositories/implementation/prisma/ListItemRepository';
-import { IListItemCreate } from '../interfaces/IListItem';
-import { RedisCache } from '../../../shared/cache/RedisCache';
+import { logger } from "../../../shared/logger";
+import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
+import { AppError } from "../../../shared/errors/AppError";
+import { generateUniqueId } from "../../../shared/functions";
+import { IListItemCreate } from "../interfaces/IListItem";
+import { IListRepository } from "../../list/interfaces/IListRepository";
+import { IListItemRepository } from "../interfaces/IListItemRepository";
+import { CONTEXT_ABBREVIATION } from "../../../shared/constants/contextsAbbreviation";
 
-export class CreateListItemService {
-  constructor(
-    private readonly listRepository: ListRepository,
-    private readonly listItemRepository: ListItemRepository,
-  ) {}
+interface ICreateListItemServiceProps extends Omit<IListItemCreate, "id"> {}
 
-  async execute({
+export default function (
+  listRepository: IListRepository,
+  listItemRepository: IListItemRepository
+) {
+  async function execute({
     listId,
     title,
     season,
@@ -21,18 +21,18 @@ export class CreateListItemService {
     chapter,
     image,
     link,
-  }: IListItemCreate): Promise<void> {
-    logger.info(`[API]: Creating list`);
+  }: ICreateListItemServiceProps): Promise<void> {
+    logger.info(`[Service]: Creating list`);
 
-    const listKey = process.env.REDIS_LIST_KEY || '';
-    const redisCache = new RedisCache();
-
-    const list = await this.listRepository.findById(listId);
+    logger.info(`[Service]: Searching for associated list`);
+    const list = await listRepository.findById(listId);
     if (!list) {
-      throw new AppError('List not found', httpStatusCodes.NOT_FOUND);
+      throw new AppError(HTTP_STATUS_CODES.NOT_FOUND, "List not found");
     }
 
-    const id = generateUniqueId('LIST_ITEM');
+    logger.info(`[Service]: List found`);
+    logger.info(`[Service]: Creating List Item`);
+    const id = generateUniqueId(CONTEXT_ABBREVIATION.LIST_ITEM);
     const listItemToCreate = {
       id,
       listId,
@@ -44,16 +44,8 @@ export class CreateListItemService {
       link,
     };
 
-    try {
-      await this.listItemRepository.create(listItemToCreate);
-      await redisCache.remove(listKey);
-      logger.info('Successfully created List Item');
-    } catch (err) {
-      logger.error('Failed to create List Item');
-      throw new AppError(
-        'Unable to create List Item',
-        httpStatusCodes.NOT_FOUND,
-      );
-    }
+    await listItemRepository.create(listItemToCreate);
   }
+
+  return { execute };
 }

@@ -1,18 +1,15 @@
-import { logger } from '../../../shared/logger';
-import { httpStatusCodes } from '../../../shared/constants/httpStatusCodes';
-import { AppError } from '../../../shared/errors/AppError';
-import { IListItemUpdate } from '../interfaces/IListItem';
-import { ListItemRepository } from '../repositories/implementation/prisma/ListItemRepository';
-import { ListRepository } from '@src/modules/list/repositories/implementation/prisma/ListRepository';
-import { RedisCache } from '../../../shared/cache/RedisCache';
+import { logger } from "../../../shared/logger";
+import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
+import { AppError } from "../../../shared/errors/AppError";
+import { IListItem, IListItemUpdate } from "../interfaces/IListItem";
+import { IListRepository } from "../../list/interfaces/IListRepository";
+import { IListItemRepository } from "../interfaces/IListItemRepository";
 
-export class UpdateListItemService {
-  constructor(
-    private readonly listRepository: ListRepository,
-    private readonly listItemRepository: ListItemRepository,
-  ) {}
-
-  async execute({
+export default function (
+  listRepository: IListRepository,
+  listItemRepository: IListItemRepository
+) {
+  async function execute({
     id,
     listId,
     title,
@@ -21,23 +18,26 @@ export class UpdateListItemService {
     chapter,
     link,
     image,
-  }: IListItemUpdate): Promise<void> {
-    logger.info(`[API]: Updating list item`);
-
-    const listKey = process.env.REDIS_LIST_KEY || '';
-    const redisCache = new RedisCache();
-
-    const list = await this.listRepository.findById(listId);
+  }: IListItemUpdate): Promise<IListItem> {
+    logger.info(`[Service]: Updating List Item`);
+    logger.info(`[Service]: Searching for associated List`);
+    const list = await listRepository.findById(listId);
     if (!list) {
-      throw new AppError('List not found', httpStatusCodes.NOT_FOUND);
+      throw new AppError(HTTP_STATUS_CODES.NOT_FOUND, "List not found");
     }
 
-    const listItem = await this.listItemRepository.findById(id);
+    logger.info(`[Service]: Found List`);
+    logger.info(`[Service]: Searching for List Item`);
+    const listItem = await listItemRepository.findById(id);
     if (!listItem) {
-      throw new AppError('List item not found', httpStatusCodes.NOT_FOUND);
+      throw new AppError(HTTP_STATUS_CODES.NOT_FOUND, "List item not found");
     }
 
+    logger.info(`[Service]: Found List Item`);
+    logger.info(`[Service]: Updating List Item`);
     const listItemToUpdate = {
+      id,
+      listId,
       title,
       season,
       episode,
@@ -45,17 +45,8 @@ export class UpdateListItemService {
       link,
       image,
     };
-
-    try {
-      await this.listItemRepository.update(id, listItemToUpdate);
-      await redisCache.remove(listKey);
-      logger.info('Successfully updated List Item');
-    } catch (err) {
-      logger.error('Failed to update List Item');
-      throw new AppError(
-        'Unable to update List Item',
-        httpStatusCodes.NOT_FOUND,
-      );
-    }
+    return listItemRepository.update(listItemToUpdate);
   }
+
+  return { execute };
 }

@@ -5,12 +5,12 @@ import {
   VercelResponse,
 } from "@vercel/node";
 
+import FindByIdListService from "../services/FindByIdListService";
+import UpdateListService from "../services/UpdateListService";
+import DeleteListService from "../services/DeleteListService";
+import { ListRepository } from "../repositories";
 import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
 import { handleResponse } from "../../../shared/handleResponse";
-import { ListRepository } from "../repositories/implementation/prisma/ListRepository";
-import { FindByIdListService } from "../services/FindByIdListService";
-import { UpdateListService } from "../services/UpdateListService";
-import { DeleteListService } from "../services/DeleteListService";
 import { handleError } from "../../../shared/errors/handleError";
 import { database } from "../../../infra/db/prisma/connection";
 
@@ -42,7 +42,7 @@ export default function (request: VercelRequest, response: VercelResponse) {
 
     try {
       const result = await updateListService.execute({
-        id,
+        id: String(id),
         title,
         description,
         category,
@@ -60,7 +60,7 @@ export default function (request: VercelRequest, response: VercelResponse) {
     const { id } = requestQuery;
 
     try {
-      const result = await deleteListService.execute(id);
+      const result = await deleteListService.execute(String(id));
       return handleResponse(HTTP_STATUS_CODES.OK, result, response);
     } catch (error: any) {
       return handleError(error, response);

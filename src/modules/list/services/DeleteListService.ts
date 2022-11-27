@@ -1,19 +1,11 @@
-import { logger } from '../../../shared/logger';
-import { IList } from '../interfaces/IList';
-import { ListRepository } from '../repositories/implementation/prisma/ListRepository';
-import { RedisCache } from '../../../shared/cache/RedisCache';
+import { logger } from "../../../shared/logger";
+import { IListRepository } from "../interfaces/IListRepository";
 
-export class DeleteListService {
-  constructor(private readonly listRepository: ListRepository) {}
-
-  async execute(id: string): Promise<IList> {
-    logger.info(`[API]: Delete List by id ${id}`);
-
-    const listKey = process.env.REDIS_LIST_KEY || '';
-    const redisCache = new RedisCache();
-
-    await redisCache.remove(listKey);
-
-    return this.listRepository.delete(id);
+export default function (listRepository: IListRepository) {
+  async function execute(id: string): Promise<void> {
+    logger.info(`[Service]: Delete List by id ${id}`);
+    await listRepository.deleteById(id);
   }
+
+  return { execute };
 }

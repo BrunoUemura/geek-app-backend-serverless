@@ -1,34 +1,11 @@
-export interface IListItem {
+import { ListItem } from "@prisma/client";
+
+export interface IListItem extends ListItem {}
+
+type PropsToOmit = "createdAt" | "updatedAt";
+export interface IListItemCreate extends Omit<IListItem, PropsToOmit> {}
+
+export interface IListItemUpdate extends Partial<IListItem> {
   id: string;
   listId: string;
-  title: string;
-  season: number;
-  episode: number;
-  chapter: number;
-  link: string;
-  image: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface IListItemCreate {
-  id?: string;
-  listId: string;
-  title: string;
-  season?: number;
-  episode?: number;
-  chapter?: number;
-  link?: string;
-  image?: string;
-}
-
-export interface IListItemUpdate {
-  id?: string;
-  listId?: string;
-  title?: string;
-  season?: number;
-  episode?: number;
-  chapter?: number;
-  link?: string;
-  image?: string;
 }
