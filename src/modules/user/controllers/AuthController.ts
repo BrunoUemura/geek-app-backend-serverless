@@ -1,4 +1,4 @@
-import { VercelRequest, VercelRequestBody, VercelResponse } from "@vercel/node";
+import { VercelRequest, VercelResponse, VercelRequestBody } from "@vercel/node";
 
 import { database } from "../../../infra/db/prisma/connection";
 import { handleResponse } from "../../../shared/handleResponse";

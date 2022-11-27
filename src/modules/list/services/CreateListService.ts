@@ -1,36 +1,34 @@
-import { IListCreate } from '../interfaces/IList';
-import { logger } from '../../../shared/logger';
-import { httpStatusCodes } from '../../../shared/constants/httpStatusCodes';
-import { AppError } from '../../../shared/errors/AppError';
-import { generateUniqueId } from '../../../shared/functions';
-import { ListRepository } from '../repositories/implementation/prisma/ListRepository';
-import { UserController } from '../../user/controllers/UserController';
-import { RedisCache } from '../../../shared/cache/RedisCache';
+import { IList, IListCreate } from "../interfaces/IList";
+import { logger } from "../../../shared/logger";
+import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
+import { AppError } from "../../../shared/errors/AppError";
+import { generateUniqueId } from "../../../shared/functions";
+import { IListRepository } from "../interfaces/IListRepository";
+import { IUserRepository } from "../../user/interfaces/IUserRepository";
 
-export class CreateListService {
-  constructor(
-    private readonly userController: UserController,
-    private readonly listRepository: ListRepository,
-  ) {}
+interface ICreateListServiceProps extends Omit<IListCreate, "id"> {}
 
-  async execute({
+export default function (
+  userRepository: IUserRepository,
+  listRepository: IListRepository
+) {
+  async function execute({
     userId,
     title,
     description,
     category,
-  }: IListCreate): Promise<void> {
-    logger.info(`[API]: Creating list`);
+  }: ICreateListServiceProps): Promise<IList> {
+    logger.info(`[Service]: Creating list`);
 
-    const listKey = process.env.REDIS_LIST_KEY || '';
-    const redisCache = new RedisCache();
-
-    const user = await this.userController.findById(userId);
+    logger.info(`[Service]: Creating list`);
+    const user = await userRepository.findById(userId);
     if (!user) {
-      throw new AppError('User not found', httpStatusCodes.NOT_FOUND);
+      throw new AppError(HTTP_STATUS_CODES.NOT_FOUND, "User not found");
     }
 
-    const id = generateUniqueId('LIST');
-
+    logger.info(`[Service]: Associated user found`);
+    logger.info(`[Service]: Creating List`);
+    const id = generateUniqueId("LIST");
     const listToCreate = {
       id,
       userId,
@@ -39,13 +37,8 @@ export class CreateListService {
       category,
     };
 
-    try {
-      await this.listRepository.create(listToCreate);
-      await redisCache.remove(listKey);
-      logger.info('Successfully created List');
-    } catch (err) {
-      logger.error('Failed to create List');
-      throw new AppError('Unable to create List', httpStatusCodes.NOT_FOUND);
-    }
+    return listRepository.create(listToCreate);
   }
+
+  return { execute };
 }

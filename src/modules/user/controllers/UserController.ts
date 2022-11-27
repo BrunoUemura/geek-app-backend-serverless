@@ -1,4 +1,8 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import {
+  VercelRequest,
+  VercelRequestQuery,
+  VercelResponse,
+} from "@vercel/node";
 
 import { database } from "../../../infra/db/prisma/connection";
 import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
@@ -11,9 +15,13 @@ export default function (request: VercelRequest, response: VercelResponse) {
   const userRepository = UserRepository();
   const findUserByIdService = FindUserByIdService(userRepository);
 
-  async function findById(id: string): Promise<VercelResponse> {
+  async function findById(
+    requestQuery: VercelRequestQuery
+  ): Promise<VercelResponse> {
+    const { id } = requestQuery;
+
     try {
-      const user = await findUserByIdService.execute(id);
+      const user = await findUserByIdService.execute(String(id));
       return handleResponse(HTTP_STATUS_CODES.CREATED, user, response);
     } catch (error: any) {
       return handleError(error, response);
@@ -24,7 +32,7 @@ export default function (request: VercelRequest, response: VercelResponse) {
     if (request.method === "GET") {
       await database.connect();
 
-      const result = await findById(String(request.query));
+      const result = await findById(request.query);
 
       await database.disconnect();
       return result;

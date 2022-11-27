@@ -1,51 +1,33 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
-import { database } from '../../../../../infra/db/prisma/connection';
-import { IList, IListCreate, IListUpdate } from '../../../interfaces/IList';
-import { IListRepository } from '../../../interfaces/IListRepository';
+import { IList, IListCreate, IListUpdate } from "../../../interfaces/IList";
+import { IListRepository } from "../../../interfaces/IListRepository";
 
 const prisma = new PrismaClient().list;
 
-export class ListRepository implements IListRepository {
-  async findAll(): Promise<IList[]> {
-    await database.connect();
-
-    const list = await prisma.findMany({ include: { listItem: true } });
-
-    await database.disconnect();
-    return list;
+export function ListRepository(): IListRepository {
+  async function findAll(): Promise<IList[]> {
+    return prisma.findMany({ include: { listItem: true } });
   }
 
-  async findById(id: string): Promise<IList> {
-    await database.connect();
-
-    const list = await prisma.findFirst({
+  async function findById(id: string): Promise<IList | null> {
+    return prisma.findFirst({
       where: { id: id },
       include: { listItem: true },
     });
-
-    await database.disconnect();
-    return list;
   }
 
-  async findByUserId(id: string): Promise<IList[]> {
-    await database.connect();
-
-    const list = await prisma.findMany({
+  async function findByUserId(id: string): Promise<IList[]> {
+    return prisma.findMany({
       where: { userId: id },
       include: { listItem: true },
     });
-
-    await database.disconnect();
-    return list;
   }
 
-  async create(data: IListCreate): Promise<IList> {
-    await database.connect();
-
-    const list = await prisma.create({
+  async function create(data: IListCreate): Promise<IList> {
+    return prisma.create({
       data: {
-        id: data.id,
+        id: String(data.id),
         userId: data.userId,
         title: data.title,
         category: data.category,
@@ -53,16 +35,11 @@ export class ListRepository implements IListRepository {
       },
       include: { listItem: true },
     });
-
-    await database.disconnect();
-    return list;
   }
 
-  async update(id: string, data: IListUpdate): Promise<IList> {
-    await database.connect();
-
-    const list = await prisma.update({
-      where: { id: id },
+  async function update(data: IListUpdate): Promise<IList> {
+    return prisma.update({
+      where: { id: data.id },
       data: {
         title: data.title,
         category: data.category,
@@ -70,17 +47,18 @@ export class ListRepository implements IListRepository {
       },
       include: { listItem: true },
     });
-
-    await database.disconnect();
-    return list;
   }
 
-  async delete(id: string): Promise<IList> {
-    await database.connect();
-
-    const list = await prisma.delete({ where: { id: id } });
-
-    await database.disconnect();
-    return list;
+  async function deleteById(id: string): Promise<void> {
+    await prisma.delete({ where: { id: id } });
   }
+
+  return {
+    findAll,
+    findById,
+    findByUserId,
+    create,
+    update,
+    deleteById,
+  };
 }

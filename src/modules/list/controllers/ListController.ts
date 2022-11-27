@@ -1,81 +1,67 @@
-import { Request, Response } from 'express';
+import { VercelRequest, VercelRequestBody, VercelResponse } from "@vercel/node";
 
-import { httpStatusCodes } from '../../../shared/constants/httpStatusCodes';
-import { handleResponse } from '../../../shared/handleResponse';
-import { ListRepository } from '../repositories/implementation/prisma/ListRepository';
-import { FindAllListService } from '../services/FindAllListService';
-import { FindByIdListService } from '../services/FindByIdListService';
-import { CreateListService } from '../services/CreateListService';
-import { UpdateListService } from '../services/UpdateListService';
-import { DeleteListService } from '../services/DeleteListService';
-import { UserController } from '../../user/controllers/UserController';
+import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
+import { handleResponse } from "../../../shared/handleResponse";
+import { ListRepository } from "../repositories/implementation/prisma/ListRepository";
+import FindAllListService from "../services/FindAllListService";
+import CreateListService from "../services/CreateListService";
+import { handleError } from "../../../shared/errors/handleError";
+import { database } from "../../../infra/db/prisma/connection";
+import { UserRepository } from "../../user/repositories";
 
-export class ListController {
-  async findAll(_request: Request, response: Response): Promise<Response> {
-    const listRepository = new ListRepository();
-    const findAllListService = new FindAllListService(listRepository);
+export default function (request: VercelRequest, response: VercelResponse) {
+  const listRepository = ListRepository();
+  const userRepository = UserRepository();
+  const findAllListService = FindAllListService(listRepository);
+  const createListService = CreateListService(userRepository, listRepository);
 
-    const result = await findAllListService.execute();
+  const findAll = async (): Promise<VercelResponse> => {
+    try {
+      const result = await findAllListService.execute();
+      return handleResponse(HTTP_STATUS_CODES.OK, result, response);
+    } catch (error: any) {
+      return handleError(error, response);
+    }
+  };
 
-    return handleResponse(httpStatusCodes.OK, result, response);
+  async function create(
+    requestBody: VercelRequestBody
+  ): Promise<VercelResponse> {
+    const { userId, title, description, category } = requestBody;
+
+    try {
+      const result = await createListService.execute({
+        userId,
+        title,
+        description,
+        category,
+      });
+
+      return handleResponse(HTTP_STATUS_CODES.OK, result, response);
+    } catch (error: any) {
+      return handleError(error, response);
+    }
   }
 
-  async findById(request: Request, response: Response): Promise<Response> {
-    const { id } = request.params;
+  async function handle() {
+    if (request.method === "GET") {
+      await database.connect();
 
-    const listRepository = new ListRepository();
-    const findByIdListService = new FindByIdListService(listRepository);
+      const result = await findAll();
 
-    const result = await findByIdListService.execute(id);
+      await database.disconnect();
+      return result;
+    }
 
-    return handleResponse(httpStatusCodes.OK, result, response);
+    if (request.method === "POST") {
+      await database.connect();
+
+      const result = await create(request.body);
+
+      await database.disconnect();
+      return result;
+    }
   }
 
-  async create(request: Request, response: Response): Promise<Response> {
-    const { userId, title, description, category } = request.body;
-
-    const userController = new UserController();
-    const listRepository = new ListRepository();
-    const createListService = new CreateListService(
-      userController,
-      listRepository,
-    );
-
-    const result = await createListService.execute({
-      userId,
-      title,
-      description,
-      category,
-    });
-
-    return handleResponse(httpStatusCodes.OK, result, response);
-  }
-
-  async update(request: Request, response: Response): Promise<Response> {
-    const { id } = request.params;
-    const { title, description, category } = request.body;
-
-    const listRepository = new ListRepository();
-    const updateListService = new UpdateListService(listRepository);
-
-    const result = await updateListService.execute({
-      id,
-      title,
-      description,
-      category,
-    });
-
-    return handleResponse(httpStatusCodes.OK, result, response);
-  }
-
-  async delete(request: Request, response: Response): Promise<Response> {
-    const { id } = request.params;
-
-    const listRepository = new ListRepository();
-    const deleteListService = new DeleteListService(listRepository);
-
-    const result = await deleteListService.execute(id);
-
-    return handleResponse(httpStatusCodes.OK, result, response);
-  }
+  return { handle };
 }
