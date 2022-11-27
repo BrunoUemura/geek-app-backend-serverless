@@ -13,7 +13,7 @@ async function connect() {
     try {
       await mongoose.connect(uri);
       logger.info("[Database]: Successfully connected to Database");
-      break;
+      retries = maxRetries + 1;
     } catch (error) {
       logger.error("[Database]: Error connecting to Database");
       logger.info(`[Database]: Connection attempt ${retries}`);
