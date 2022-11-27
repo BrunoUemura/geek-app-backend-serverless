@@ -5,6 +5,7 @@ import { IUserRepository } from "../interfaces/IUserRepository";
 import { AppError } from "../../../shared/errors/AppError";
 import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
 import { generateUniqueId } from "../../../shared/functions";
+import { CONTEXT_ABBREVIATION } from "../../../shared/constants/contextsAbbreviation";
 
 export default function (userRepository: IUserRepository) {
   async function execute({ username, email, password }: IUserCreate) {
@@ -26,7 +27,7 @@ export default function (userRepository: IUserRepository) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const id = generateUniqueId("USER");
+    const id = generateUniqueId(CONTEXT_ABBREVIATION.USER);
     return userRepository.create({
       id,
       username,

@@ -1,5 +1,5 @@
-export enum contextsAbbreviation {
-  USER = 'USR',
-  LIST = 'LST',
-  LIST_ITEM = 'ITM',
+export enum CONTEXT_ABBREVIATION {
+  USER = "USR",
+  LIST = "LST",
+  LIST_ITEM = "ITM",
 }

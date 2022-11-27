@@ -1,3 +1,2 @@
-import { UserRepository } from "./implementation/mongo/UserRepository";
-
+import { UserRepository } from "./implementation/prisma/UserRepository";
 export { UserRepository };

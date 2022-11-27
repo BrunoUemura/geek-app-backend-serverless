@@ -1,11 +1,12 @@
 import { VercelRequest, VercelRequestBody, VercelResponse } from "@vercel/node";
 
-import SignInUserService from "../services/SignInUserService";
-import SignUpUserService from "../services/SignUpUserService";
+import { database } from "../../../infra/db/prisma/connection";
 import { handleResponse } from "../../../shared/handleResponse";
 import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
-import { UserRepository } from "../repositories";
 import { handleError } from "../../../shared/errors/handleError";
+import { UserRepository } from "../repositories";
+import SignInUserService from "../services/SignInUserService";
+import SignUpUserService from "../services/SignUpUserService";
 
 export default function (request: VercelRequest, response: VercelResponse) {
   const userRepository = UserRepository();
@@ -46,11 +47,21 @@ export default function (request: VercelRequest, response: VercelResponse) {
 
   async function handle() {
     if (request.method === "POST" && request.url?.includes("/signin")) {
-      return signInUser(request.body);
+      await database.connect();
+
+      const result = await signInUser(request.body);
+
+      await database.disconnect();
+      return result;
     }
 
     if (request.method === "POST" && request.url?.includes("/signup")) {
-      return signUpUser(request.body);
+      await database.connect();
+
+      const result = await signUpUser(request.body);
+
+      await database.disconnect();
+      return result;
     }
   }
 

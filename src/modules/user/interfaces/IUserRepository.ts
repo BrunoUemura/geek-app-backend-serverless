@@ -1,4 +1,4 @@
-import { IUser, IUserCreate, IUserUpdate } from "./IUser";
+import { IUser } from "./IUser";
 
 export interface IUserRepository {
   findAll: () => Promise<IUser[]>;

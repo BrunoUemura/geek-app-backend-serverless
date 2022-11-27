@@ -39,7 +39,7 @@ export function UserRepository(): IUserRepository {
     username,
     email,
     password,
-  }: IUserCreate): Promise<IUser> {
+  }: IUser): Promise<IUser> {
     await database.connect();
     const user = new User({
       _id: id,

@@ -1,51 +1,60 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
-import { database } from '../../../../../infra/db/prisma/connection';
-import { IUserRepository } from '../../../interfaces/IUserRepository';
-import { IUser, IUserCreate, IUserUpdate } from '../../../interfaces/IUser';
+import { IUserRepository } from "../../../interfaces/IUserRepository";
+import { IUser } from "../../../interfaces/IUser";
 
 const prisma = new PrismaClient().user;
 
-export class UserRepository implements IUserRepository {
-  async findById(id: string): Promise<IUser | null> {
-    await database.connect();
-    const user = await prisma.findFirst({ where: { id: id } });
-    await database.disconnect();
-    return user;
+export function UserRepository(): IUserRepository {
+  async function findAll(): Promise<IUser[]> {
+    return prisma.findMany();
   }
 
-  async findByEmail(email: string): Promise<IUser | null> {
-    await database.connect();
-    const user = await prisma.findFirst({ where: { email: email } });
-    await database.disconnect();
-    return user;
+  async function findById(id: string): Promise<IUser | null> {
+    return prisma.findFirst({ where: { id: id } });
   }
 
-  async create(data: IUserCreate): Promise<IUser> {
-    await database.connect();
-    const user = await prisma.create({
+  async function findByUsername(username: string): Promise<IUser | null> {
+    return prisma.findFirst({ where: { username: username } });
+  }
+
+  async function findByEmail(email: string): Promise<IUser | null> {
+    return prisma.findFirst({ where: { email: email } });
+  }
+
+  async function create(data: IUser): Promise<IUser> {
+    return prisma.create({
       data: {
-        id: data.id,
+        id: String(data.id),
         username: data.username,
         email: data.email,
         password: data.password,
       },
     });
-    await database.disconnect();
-    return user;
   }
 
-  async update(id: string, data: IUserUpdate): Promise<IUser> {
-    await database.connect();
-    const user = await prisma.update({
-      where: { id: id },
+  async function update(data: IUser): Promise<IUser> {
+    return prisma.update({
+      where: { id: data.id },
       data: {
         username: data.username,
         email: data.email,
         password: data.password,
       },
     });
-    await database.disconnect();
-    return user;
   }
+
+  async function deleteById(id: string): Promise<void> {
+    await prisma.delete({ where: { id: id } });
+  }
+
+  return {
+    findAll,
+    findById,
+    findByUsername,
+    findByEmail,
+    create,
+    update,
+    deleteById,
+  };
 }

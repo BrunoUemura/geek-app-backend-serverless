@@ -1,15 +1,13 @@
-import { contextsAbbreviation } from './constants/contextsAbbreviation';
-
 export function delay(time: number) {
-  return new Promise(resolve => setTimeout(resolve, time));
+  return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-export function generateUniqueId(context: string) {
+export function generateUniqueId(scope: string) {
   const pattern = /[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi;
 
   const id =
-    contextsAbbreviation[context] +
-    new Date().toLocaleDateString('US').replaceAll(pattern, '') +
+    scope +
+    new Date().toLocaleDateString("US").replaceAll(pattern, "") +
     Math.floor((1 + Math.random()) * 0x10000)
       .toString(16)
       .substring(1)

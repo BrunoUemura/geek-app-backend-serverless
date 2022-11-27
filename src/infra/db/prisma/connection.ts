@@ -1,9 +1,9 @@
-import mongoose from "mongoose";
+import { PrismaClient } from "@prisma/client";
 
 import { delay } from "../../../shared/functions";
 import { logger } from "../../../shared/logger";
 
-const uri = String(process.env.DATABASE_URL);
+export const prisma = new PrismaClient();
 
 async function connect() {
   let retries = 1;
@@ -11,7 +11,7 @@ async function connect() {
 
   while (retries <= maxRetries) {
     try {
-      await mongoose.connect(uri);
+      await prisma.$connect();
       logger.info("[Database]: Successfully connected to Database");
       break;
     } catch (error) {
@@ -30,11 +30,14 @@ async function connect() {
 
 async function disconnect() {
   try {
-    await mongoose.disconnect();
+    await prisma.$disconnect();
     logger.info("[Database]: Successfully disconnected from Database");
   } catch (error) {
     logger.error("[Database]: Error disconnecting from Database");
   }
 }
 
-export const database = { connect, disconnect };
+export const database = {
+  connect,
+  disconnect,
+};
