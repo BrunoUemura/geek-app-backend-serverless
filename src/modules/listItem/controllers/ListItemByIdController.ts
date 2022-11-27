@@ -12,6 +12,7 @@ import { ListRepository } from "../../list/repositories";
 import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
 import { handleResponse } from "../../../shared/handleResponse";
 import { handleError } from "../../../shared/errors/handleError";
+import { database } from "../../../infra/db/prisma/connection";
 
 export default function (request: VercelRequest, response: VercelResponse) {
   const listRepository = ListRepository();
@@ -66,11 +67,17 @@ export default function (request: VercelRequest, response: VercelResponse) {
 
   async function handle() {
     if (request.method === "PUT") {
-      return update(request.query, request.body);
+      await database.connect();
+      const result = await update(request.query, request.body);
+      await database.disconnect();
+      return result;
     }
 
     if (request.method === "DELETE") {
-      return deleteById(request.query);
+      await database.connect();
+      const result = await deleteById(request.query);
+      await database.disconnect();
+      return result;
     }
 
     return handleResponse(

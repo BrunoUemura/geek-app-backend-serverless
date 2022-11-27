@@ -70,27 +70,21 @@ export default function (request: VercelRequest, response: VercelResponse) {
   async function handle() {
     if (request.method === "GET") {
       await database.connect();
-
       const result = await findById(request.query);
-
       await database.disconnect();
       return result;
     }
 
     if (request.method === "PUT") {
       await database.connect();
-
       const result = await update(request.query, request.body);
-
       await database.disconnect();
       return result;
     }
 
     if (request.method === "DELETE") {
       await database.connect();
-
       const result = await deleteById(request.query);
-
       await database.disconnect();
       return result;
     }

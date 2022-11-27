@@ -46,18 +46,14 @@ export default function (request: VercelRequest, response: VercelResponse) {
   async function handle() {
     if (request.method === "GET") {
       await database.connect();
-
       const result = await findAll();
-
       await database.disconnect();
       return result;
     }
 
     if (request.method === "POST") {
       await database.connect();
-
       const result = await create(request.body);
-
       await database.disconnect();
       return result;
     }
