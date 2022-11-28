@@ -1,2 +1,2 @@
-import { ListRepository } from "./implementation/prisma/ListRepository";
+import { ListRepository } from './implementation/prisma/ListRepository';
 export { ListRepository };

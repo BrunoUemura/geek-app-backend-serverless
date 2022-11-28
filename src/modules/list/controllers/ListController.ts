@@ -1,14 +1,14 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import { VercelRequest, VercelResponse } from '@vercel/node';
 
-import FindAllListService from "../services/FindAllListService";
-import CreateListService from "../services/CreateListService";
-import { ListRepository } from "../repositories";
-import { UserRepository } from "../../user/repositories";
-import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
-import { handleResponse } from "../../../shared/handleResponse";
-import { handleError } from "../../../shared/errors/handleError";
-import { isAuthenticated } from "../../../shared/isAuthenticated";
-import { DBConnection } from "../../../shared/decorators/DBConnection";
+import FindAllListService from '../services/FindAllListService';
+import CreateListService from '../services/CreateListService';
+import { ListRepository } from '../repositories';
+import { UserRepository } from '../../user/repositories';
+import { HTTP_STATUS_CODES } from '../../../shared/constants/httpStatusCodes';
+import { handleResponse } from '../../../shared/handleResponse';
+import { handleError } from '../../../shared/errors/handleError';
+import { isAuthenticated } from '../../../shared/isAuthenticated';
+import { DBConnection } from '../../../shared/decorators/DBConnection';
 
 class ListController {
   private readonly listRepository;
@@ -22,7 +22,7 @@ class ListController {
     this.findAllListService = FindAllListService(this.listRepository);
     this.createListService = CreateListService(
       this.userRepository,
-      this.listRepository
+      this.listRepository,
     );
   }
 
@@ -54,11 +54,11 @@ class ListController {
   }
 
   public async handle(request: VercelRequest, response: VercelResponse) {
-    if (request.method === "GET") {
+    if (request.method === 'GET') {
       return this.findAll(request, response);
     }
 
-    if (request.method === "POST") {
+    if (request.method === 'POST') {
       return this.create(request, response);
     }
   }

@@ -1,14 +1,14 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import { VercelRequest, VercelResponse } from '@vercel/node';
 
-import FindByIdListService from "../services/FindByIdListService";
-import UpdateListService from "../services/UpdateListService";
-import DeleteListService from "../services/DeleteListService";
-import { ListRepository } from "../repositories";
-import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
-import { handleResponse } from "../../../shared/handleResponse";
-import { handleError } from "../../../shared/errors/handleError";
-import { DBConnection } from "../../../shared/decorators/DBConnection";
-import { isAuthenticated } from "../../../shared/isAuthenticated";
+import FindByIdListService from '../services/FindByIdListService';
+import UpdateListService from '../services/UpdateListService';
+import DeleteListService from '../services/DeleteListService';
+import { ListRepository } from '../repositories';
+import { HTTP_STATUS_CODES } from '../../../shared/constants/httpStatusCodes';
+import { handleResponse } from '../../../shared/handleResponse';
+import { handleError } from '../../../shared/errors/handleError';
+import { DBConnection } from '../../../shared/decorators/DBConnection';
+import { isAuthenticated } from '../../../shared/isAuthenticated';
 
 class ListByIdController {
   private readonly listRepository;
@@ -72,22 +72,22 @@ class ListByIdController {
   }
 
   public async handle(request: VercelRequest, response: VercelResponse) {
-    if (request.method === "GET") {
+    if (request.method === 'GET') {
       return this.findById(request, response);
     }
 
-    if (request.method === "PUT") {
+    if (request.method === 'PUT') {
       return this.update(request, response);
     }
 
-    if (request.method === "DELETE") {
+    if (request.method === 'DELETE') {
       return this.deleteById(request, response);
     }
 
     return handleResponse(
       HTTP_STATUS_CODES.NOT_FOUND,
       `Requested http method [${request.method}] not available`,
-      response
+      response,
     );
   }
 }

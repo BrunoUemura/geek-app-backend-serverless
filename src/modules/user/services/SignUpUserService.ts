@@ -1,11 +1,11 @@
-import bcrypt from "bcrypt";
+import bcrypt from 'bcrypt';
 
-import { IUserCreate } from "../interfaces/IUser";
-import { IUserRepository } from "../interfaces/IUserRepository";
-import { AppError } from "../../../shared/errors/AppError";
-import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
-import { generateUniqueId } from "../../../shared/functions";
-import { CONTEXT_ABBREVIATION } from "../../../shared/constants/contextsAbbreviation";
+import { IUserCreate } from '../interfaces/IUser';
+import { IUserRepository } from '../interfaces/IUserRepository';
+import { AppError } from '../../../shared/errors/AppError';
+import { HTTP_STATUS_CODES } from '../../../shared/constants/httpStatusCodes';
+import { generateUniqueId } from '../../../shared/functions';
+import { CONTEXT_ABBREVIATION } from '../../../shared/constants/contextsAbbreviation';
 
 export default function (userRepository: IUserRepository) {
   async function execute({ username, email, password }: IUserCreate) {
@@ -13,7 +13,7 @@ export default function (userRepository: IUserRepository) {
     if (emailExists) {
       throw new AppError(
         HTTP_STATUS_CODES.BAD_REQUEST,
-        "User with provided email already exists"
+        'User with provided email already exists',
       );
     }
 
@@ -21,7 +21,7 @@ export default function (userRepository: IUserRepository) {
     if (usernameExists) {
       throw new AppError(
         HTTP_STATUS_CODES.BAD_REQUEST,
-        "User with provided username already exists"
+        'User with provided username already exists',
       );
     }
 

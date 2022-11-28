@@ -1,5 +1,5 @@
 export function delay(time: number) {
-  return new Promise((resolve) => setTimeout(resolve, time));
+  return new Promise(resolve => setTimeout(resolve, time));
 }
 
 export function generateUniqueId(scope: string) {
@@ -7,7 +7,7 @@ export function generateUniqueId(scope: string) {
 
   const id =
     scope +
-    new Date().toLocaleDateString("US").replaceAll(pattern, "") +
+    new Date().toLocaleDateString('US').replaceAll(pattern, '') +
     Math.floor((1 + Math.random()) * 0x10000)
       .toString(16)
       .substring(1)

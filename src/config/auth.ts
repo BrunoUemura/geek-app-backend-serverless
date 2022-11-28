@@ -1,4 +1,4 @@
-import { Secret } from "jsonwebtoken";
+import { Secret } from 'jsonwebtoken';
 
 interface IAuthConfig {
   jwt: {
@@ -10,6 +10,6 @@ interface IAuthConfig {
 export const authConfig: IAuthConfig = Object.freeze({
   jwt: {
     secret: process.env.TOKEN_SECRET,
-    expiresIn: "1d",
+    expiresIn: '1d',
   },
 });

@@ -1,7 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 
-import { IList, IListCreate, IListUpdate } from "../../../interfaces/IList";
-import { IListRepository } from "../../../interfaces/IListRepository";
+import { IList, IListCreate, IListUpdate } from '../../../interfaces/IList';
+import { IListRepository } from '../../../interfaces/IListRepository';
 
 const prisma = new PrismaClient().list;
 

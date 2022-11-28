@@ -1,7 +1,7 @@
-import { database } from "../../../../../infra/db/mongoose/connection";
-import { User } from "../../../entities/User";
-import { IUserRepository } from "../../../interfaces/IUserRepository";
-import { IUser, IUserCreate } from "../../../interfaces/IUser";
+import { database } from '../../../../../infra/db/mongoose/connection';
+import { User } from '../../../entities/User';
+import { IUserRepository } from '../../../interfaces/IUserRepository';
+import { IUser, IUserCreate } from '../../../interfaces/IUser';
 
 export function UserRepository(): IUserRepository {
   async function findAll(): Promise<IUser[]> {
@@ -66,7 +66,7 @@ export function UserRepository(): IUserRepository {
         email,
         password,
       },
-      { new: true }
+      { new: true },
     );
 
     await database.disconnect();

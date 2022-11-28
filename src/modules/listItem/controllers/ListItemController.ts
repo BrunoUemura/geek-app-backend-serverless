@@ -1,13 +1,13 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import { VercelRequest, VercelResponse } from '@vercel/node';
 
-import CreateListItemService from "../services/CreateListItemService";
-import { ListItemRepository } from "../repositories";
-import { ListRepository } from "../../list/repositories";
-import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
-import { handleResponse } from "../../../shared/handleResponse";
-import { handleError } from "../../../shared/errors/handleError";
-import { DBConnection } from "../../../shared/decorators/DBConnection";
-import { isAuthenticated } from "../../../shared/isAuthenticated";
+import CreateListItemService from '../services/CreateListItemService';
+import { ListItemRepository } from '../repositories';
+import { ListRepository } from '../../list/repositories';
+import { HTTP_STATUS_CODES } from '../../../shared/constants/httpStatusCodes';
+import { handleResponse } from '../../../shared/handleResponse';
+import { handleError } from '../../../shared/errors/handleError';
+import { DBConnection } from '../../../shared/decorators/DBConnection';
+import { isAuthenticated } from '../../../shared/isAuthenticated';
 
 class ListItemController {
   private readonly listRepository;
@@ -19,7 +19,7 @@ class ListItemController {
     this.listItemRepository = ListItemRepository();
     this.createListItemService = CreateListItemService(
       this.listRepository,
-      this.listItemRepository
+      this.listItemRepository,
     );
   }
 
@@ -48,14 +48,14 @@ class ListItemController {
   }
 
   public async handle(request: VercelRequest, response: VercelResponse) {
-    if (request.method === "POST") {
+    if (request.method === 'POST') {
       return this.create(request, response);
     }
 
     return handleResponse(
       HTTP_STATUS_CODES.NOT_FOUND,
       `Requested http method [${request.method}] not available`,
-      response
+      response,
     );
   }
 }

@@ -1,11 +1,11 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 
 import {
   IListItem,
   IListItemCreate,
   IListItemUpdate,
-} from "../../../interfaces/IListItem";
-import { IListItemRepository } from "../../../interfaces/IListItemRepository";
+} from '../../../interfaces/IListItem';
+import { IListItemRepository } from '../../../interfaces/IListItemRepository';
 
 const prisma = new PrismaClient().listItem;
 

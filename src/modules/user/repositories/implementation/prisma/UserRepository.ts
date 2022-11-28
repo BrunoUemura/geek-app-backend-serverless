@@ -1,7 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 
-import { IUserRepository } from "../../../interfaces/IUserRepository";
-import { IUser } from "../../../interfaces/IUser";
+import { IUserRepository } from '../../../interfaces/IUserRepository';
+import { IUser } from '../../../interfaces/IUser';
 
 const prisma = new PrismaClient().user;
 

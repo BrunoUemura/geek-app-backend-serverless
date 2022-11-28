@@ -1,4 +1,4 @@
-import { IList, IListCreate, IListUpdate } from "./IList";
+import { IList, IListCreate, IListUpdate } from './IList';
 
 export interface IListRepository {
   findAll: () => Promise<IList[]>;

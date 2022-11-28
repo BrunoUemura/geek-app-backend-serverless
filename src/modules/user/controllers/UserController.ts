@@ -1,11 +1,11 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import { VercelRequest, VercelResponse } from '@vercel/node';
 
-import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
-import { DBConnection } from "../../../shared/decorators/DBConnection";
-import { handleError } from "../../../shared/errors/handleError";
-import { handleResponse } from "../../../shared/handleResponse";
-import { UserRepository } from "../repositories";
-import FindUserByIdService from "../services/FindUserByIdService";
+import { HTTP_STATUS_CODES } from '../../../shared/constants/httpStatusCodes';
+import { DBConnection } from '../../../shared/decorators/DBConnection';
+import { handleError } from '../../../shared/errors/handleError';
+import { handleResponse } from '../../../shared/handleResponse';
+import { UserRepository } from '../repositories';
+import FindUserByIdService from '../services/FindUserByIdService';
 
 class UserController {
   private readonly userRepository;
@@ -29,7 +29,7 @@ class UserController {
   }
 
   public async handle(request: VercelRequest, response: VercelResponse) {
-    if (request.method === "GET") {
+    if (request.method === 'GET') {
       return this.findById(request, response);
     }
   }

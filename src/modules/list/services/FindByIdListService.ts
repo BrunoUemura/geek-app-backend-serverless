@@ -1,6 +1,6 @@
-import { logger } from "../../../shared/logger";
-import { IList } from "../interfaces/IList";
-import { IListRepository } from "../interfaces/IListRepository";
+import { logger } from '../../../shared/logger';
+import { IList } from '../interfaces/IList';
+import { IListRepository } from '../interfaces/IListRepository';
 
 export default function (listRepository: IListRepository) {
   async function execute(id: string): Promise<IList | null> {

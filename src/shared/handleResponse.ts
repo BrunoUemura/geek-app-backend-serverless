@@ -1,12 +1,12 @@
-import { VercelResponse } from "@vercel/node";
+import { VercelResponse } from '@vercel/node';
 
 export const handleResponse = (
   statusCode: number,
   data: any,
-  response: VercelResponse
+  response: VercelResponse,
 ) => {
   return response.status(statusCode).send({
-    status: "success",
+    status: 'success',
     data: data,
   });
 };

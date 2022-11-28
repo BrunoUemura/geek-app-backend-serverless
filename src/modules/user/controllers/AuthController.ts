@@ -1,12 +1,12 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import { VercelRequest, VercelResponse } from '@vercel/node';
 
-import { handleResponse } from "../../../shared/handleResponse";
-import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
-import { handleError } from "../../../shared/errors/handleError";
-import { UserRepository } from "../repositories";
-import SignInUserService from "../services/SignInUserService";
-import SignUpUserService from "../services/SignUpUserService";
-import { DBConnection } from "../../../shared/decorators/DBConnection";
+import { handleResponse } from '../../../shared/handleResponse';
+import { HTTP_STATUS_CODES } from '../../../shared/constants/httpStatusCodes';
+import { handleError } from '../../../shared/errors/handleError';
+import { UserRepository } from '../repositories';
+import SignInUserService from '../services/SignInUserService';
+import SignUpUserService from '../services/SignUpUserService';
+import { DBConnection } from '../../../shared/decorators/DBConnection';
 
 class AuthController {
   private readonly userRepository;
@@ -49,11 +49,11 @@ class AuthController {
   }
 
   public async handle(request: VercelRequest, response: VercelResponse) {
-    if (request.method === "POST" && request.url?.includes("/signin")) {
+    if (request.method === 'POST' && request.url?.includes('/signin')) {
       return this.signInUser(request, response);
     }
 
-    if (request.method === "POST" && request.url?.includes("/signup")) {
+    if (request.method === 'POST' && request.url?.includes('/signup')) {
       return this.signUpUser(request, response);
     }
   }

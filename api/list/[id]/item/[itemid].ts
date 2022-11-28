@@ -1,6 +1,6 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-import ListItemByIdController from "../../../../src/modules/listItem/controllers/ListItemByIdController";
+import ListItemByIdController from '../../../../src/modules/listItem/controllers/ListItemByIdController';
 
 export default function (request: VercelRequest, response: VercelResponse) {
   return ListItemByIdController.handle(request, response);

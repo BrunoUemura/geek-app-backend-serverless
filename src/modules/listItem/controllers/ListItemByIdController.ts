@@ -1,14 +1,14 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import { VercelRequest, VercelResponse } from '@vercel/node';
 
-import UpdateListItemService from "../services/UpdateListItemService";
-import DeleteListItemService from "../services/DeleteListItemService";
-import { ListItemRepository } from "../repositories";
-import { ListRepository } from "../../list/repositories";
-import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
-import { handleResponse } from "../../../shared/handleResponse";
-import { handleError } from "../../../shared/errors/handleError";
-import { isAuthenticated } from "../../../shared/isAuthenticated";
-import { DBConnection } from "../../../shared/decorators/DBConnection";
+import UpdateListItemService from '../services/UpdateListItemService';
+import DeleteListItemService from '../services/DeleteListItemService';
+import { ListItemRepository } from '../repositories';
+import { ListRepository } from '../../list/repositories';
+import { HTTP_STATUS_CODES } from '../../../shared/constants/httpStatusCodes';
+import { handleResponse } from '../../../shared/handleResponse';
+import { handleError } from '../../../shared/errors/handleError';
+import { isAuthenticated } from '../../../shared/isAuthenticated';
+import { DBConnection } from '../../../shared/decorators/DBConnection';
 
 class ListItemByIdController {
   private readonly listRepository;
@@ -21,11 +21,11 @@ class ListItemByIdController {
     this.listItemRepository = ListItemRepository();
     this.updateListItemService = UpdateListItemService(
       this.listRepository,
-      this.listItemRepository
+      this.listItemRepository,
     );
     this.deleteListItemService = DeleteListItemService(
       this.listRepository,
-      this.listItemRepository
+      this.listItemRepository,
     );
   }
 
@@ -63,7 +63,7 @@ class ListItemByIdController {
 
       const result = await this.deleteListItemService.execute(
         String(listId),
-        String(itemid)
+        String(itemid),
       );
 
       return handleResponse(HTTP_STATUS_CODES.OK, result, response);
@@ -73,18 +73,18 @@ class ListItemByIdController {
   }
 
   public async handle(request: VercelRequest, response: VercelResponse) {
-    if (request.method === "PUT") {
+    if (request.method === 'PUT') {
       return this.update(request, response);
     }
 
-    if (request.method === "DELETE") {
+    if (request.method === 'DELETE') {
       return this.deleteById(request, response);
     }
 
     return handleResponse(
       HTTP_STATUS_CODES.NOT_FOUND,
       `Requested http method [${request.method}] not available`,
-      response
+      response,
     );
   }
 }

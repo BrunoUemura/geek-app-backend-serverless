@@ -1,7 +1,7 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-import { delay } from "../../../shared/functions";
-import { logger } from "../../../shared/logger";
+import { delay } from '../../../shared/functions';
+import { logger } from '../../../shared/logger';
 
 const uri = String(process.env.DATABASE_URL);
 
@@ -12,14 +12,14 @@ async function connect() {
   while (retries <= maxRetries) {
     try {
       await mongoose.connect(uri);
-      logger.info("[Database]: Successfully connected to Database");
+      logger.info('[Database]: Successfully connected to Database');
       retries = maxRetries + 1;
     } catch (error) {
-      logger.error("[Database]: Error connecting to Database");
+      logger.error('[Database]: Error connecting to Database');
       logger.info(`[Database]: Connection attempt ${retries}`);
 
       if (retries === maxRetries) {
-        throw new Error("Failed to connect to Database");
+        throw new Error('Failed to connect to Database');
       }
 
       retries++;
@@ -31,9 +31,9 @@ async function connect() {
 async function disconnect() {
   try {
     await mongoose.disconnect();
-    logger.info("[Database]: Successfully disconnected from Database");
+    logger.info('[Database]: Successfully disconnected from Database');
   } catch (error) {
-    logger.error("[Database]: Error disconnecting from Database");
+    logger.error('[Database]: Error disconnecting from Database');
   }
 }
 

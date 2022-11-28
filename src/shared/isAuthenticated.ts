@@ -1,10 +1,10 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
-import jwt from "jsonwebtoken";
+import { VercelRequest, VercelResponse } from '@vercel/node';
+import jwt from 'jsonwebtoken';
 
-import { AppError } from "./errors/AppError";
-import { authConfig } from "../config/auth";
-import { HTTP_STATUS_CODES } from "./constants/httpStatusCodes";
-import { logger } from "./logger";
+import { AppError } from './errors/AppError';
+import { authConfig } from '../config/auth';
+import { HTTP_STATUS_CODES } from './constants/httpStatusCodes';
+import { logger } from './logger';
 
 interface ITokenPayload {
   iat: number;
@@ -14,14 +14,14 @@ interface ITokenPayload {
 
 export async function isAuthenticated(
   request: VercelRequest,
-  response: VercelResponse
+  response: VercelResponse,
 ) {
   const authHeader = request.headers.authorization;
   if (!authHeader) {
-    throw new AppError(HTTP_STATUS_CODES.UNAUTHORIZED, "JWT token is required");
+    throw new AppError(HTTP_STATUS_CODES.UNAUTHORIZED, 'JWT token is required');
   }
 
-  const [_, token] = authHeader.split(" ");
+  const [_, token] = authHeader.split(' ');
 
   try {
     const decodedToken = jwt.verify(token, String(authConfig.jwt.secret));
@@ -32,6 +32,6 @@ export async function isAuthenticated(
     // };
   } catch (error: any) {
     logger.error(error);
-    throw new AppError(HTTP_STATUS_CODES.UNAUTHORIZED, "JWT token is invalid");
+    throw new AppError(HTTP_STATUS_CODES.UNAUTHORIZED, 'JWT token is invalid');
   }
 }

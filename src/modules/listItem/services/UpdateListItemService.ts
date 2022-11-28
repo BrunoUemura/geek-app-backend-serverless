@@ -1,13 +1,13 @@
-import { logger } from "../../../shared/logger";
-import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
-import { AppError } from "../../../shared/errors/AppError";
-import { IListItem, IListItemUpdate } from "../interfaces/IListItem";
-import { IListRepository } from "../../list/interfaces/IListRepository";
-import { IListItemRepository } from "../interfaces/IListItemRepository";
+import { logger } from '../../../shared/logger';
+import { HTTP_STATUS_CODES } from '../../../shared/constants/httpStatusCodes';
+import { AppError } from '../../../shared/errors/AppError';
+import { IListItem, IListItemUpdate } from '../interfaces/IListItem';
+import { IListRepository } from '../../list/interfaces/IListRepository';
+import { IListItemRepository } from '../interfaces/IListItemRepository';
 
 export default function (
   listRepository: IListRepository,
-  listItemRepository: IListItemRepository
+  listItemRepository: IListItemRepository,
 ) {
   async function execute({
     id,
@@ -23,14 +23,14 @@ export default function (
     logger.info(`[Service]: Searching for associated List`);
     const list = await listRepository.findById(listId);
     if (!list) {
-      throw new AppError(HTTP_STATUS_CODES.NOT_FOUND, "List not found");
+      throw new AppError(HTTP_STATUS_CODES.NOT_FOUND, 'List not found');
     }
 
     logger.info(`[Service]: Found List`);
     logger.info(`[Service]: Searching for List Item`);
     const listItem = await listItemRepository.findById(id);
     if (!listItem) {
-      throw new AppError(HTTP_STATUS_CODES.NOT_FOUND, "List item not found");
+      throw new AppError(HTTP_STATUS_CODES.NOT_FOUND, 'List item not found');
     }
 
     logger.info(`[Service]: Found List Item`);

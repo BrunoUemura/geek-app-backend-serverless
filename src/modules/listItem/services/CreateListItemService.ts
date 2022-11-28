@@ -1,17 +1,17 @@
-import { logger } from "../../../shared/logger";
-import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
-import { AppError } from "../../../shared/errors/AppError";
-import { generateUniqueId } from "../../../shared/functions";
-import { IListItemCreate } from "../interfaces/IListItem";
-import { IListRepository } from "../../list/interfaces/IListRepository";
-import { IListItemRepository } from "../interfaces/IListItemRepository";
-import { CONTEXT_ABBREVIATION } from "../../../shared/constants/contextsAbbreviation";
+import { logger } from '../../../shared/logger';
+import { HTTP_STATUS_CODES } from '../../../shared/constants/httpStatusCodes';
+import { AppError } from '../../../shared/errors/AppError';
+import { generateUniqueId } from '../../../shared/functions';
+import { IListItemCreate } from '../interfaces/IListItem';
+import { IListRepository } from '../../list/interfaces/IListRepository';
+import { IListItemRepository } from '../interfaces/IListItemRepository';
+import { CONTEXT_ABBREVIATION } from '../../../shared/constants/contextsAbbreviation';
 
-interface ICreateListItemServiceProps extends Omit<IListItemCreate, "id"> {}
+interface ICreateListItemServiceProps extends Omit<IListItemCreate, 'id'> {}
 
 export default function (
   listRepository: IListRepository,
-  listItemRepository: IListItemRepository
+  listItemRepository: IListItemRepository,
 ) {
   async function execute({
     listId,
@@ -27,7 +27,7 @@ export default function (
     logger.info(`[Service]: Searching for associated list`);
     const list = await listRepository.findById(listId);
     if (!list) {
-      throw new AppError(HTTP_STATUS_CODES.NOT_FOUND, "List not found");
+      throw new AppError(HTTP_STATUS_CODES.NOT_FOUND, 'List not found');
     }
 
     logger.info(`[Service]: List found`);

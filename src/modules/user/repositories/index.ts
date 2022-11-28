@@ -1,2 +1,2 @@
-import { UserRepository } from "./implementation/prisma/UserRepository";
+import { UserRepository } from './implementation/prisma/UserRepository';
 export { UserRepository };
