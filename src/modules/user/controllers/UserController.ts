@@ -1,43 +1,38 @@
-import {
-  VercelRequest,
-  VercelRequestQuery,
-  VercelResponse,
-} from "@vercel/node";
+import { VercelRequest, VercelResponse } from "@vercel/node";
 
-import { database } from "../../../infra/db/prisma/connection";
 import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
+import { DBConnection } from "../../../shared/decorators/DBConnection";
 import { handleError } from "../../../shared/errors/handleError";
 import { handleResponse } from "../../../shared/handleResponse";
 import { UserRepository } from "../repositories";
 import FindUserByIdService from "../services/FindUserByIdService";
 
-export default function (request: VercelRequest, response: VercelResponse) {
-  const userRepository = UserRepository();
-  const findUserByIdService = FindUserByIdService(userRepository);
+class UserController {
+  private readonly userRepository;
+  private readonly findUserByIdService;
 
-  async function findById(
-    requestQuery: VercelRequestQuery
-  ): Promise<VercelResponse> {
-    const { id } = requestQuery;
+  constructor() {
+    this.userRepository = UserRepository();
+    this.findUserByIdService = FindUserByIdService(this.userRepository);
+  }
+
+  @DBConnection()
+  private async findById(request: VercelRequest, response: VercelResponse) {
+    const { id } = request.query;
 
     try {
-      const user = await findUserByIdService.execute(String(id));
+      const user = await this.findUserByIdService.execute(String(id));
       return handleResponse(HTTP_STATUS_CODES.CREATED, user, response);
     } catch (error: any) {
       return handleError(error, response);
     }
   }
 
-  async function handle() {
+  public async handle(request: VercelRequest, response: VercelResponse) {
     if (request.method === "GET") {
-      await database.connect();
-
-      const result = await findById(request.query);
-
-      await database.disconnect();
-      return result;
+      return this.findById(request, response);
     }
   }
-
-  return { handle };
 }
+
+export default new UserController();

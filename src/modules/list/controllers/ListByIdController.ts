@@ -1,9 +1,4 @@
-import {
-  VercelRequest,
-  VercelRequestBody,
-  VercelRequestQuery,
-  VercelResponse,
-} from "@vercel/node";
+import { VercelRequest, VercelResponse } from "@vercel/node";
 
 import FindByIdListService from "../services/FindByIdListService";
 import UpdateListService from "../services/UpdateListService";
@@ -12,36 +7,43 @@ import { ListRepository } from "../repositories";
 import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
 import { handleResponse } from "../../../shared/handleResponse";
 import { handleError } from "../../../shared/errors/handleError";
-import { database } from "../../../infra/db/prisma/connection";
+import { DBConnection } from "../../../shared/decorators/DBConnection";
+import { isAuthenticated } from "../../../shared/isAuthenticated";
 
-export default function (request: VercelRequest, response: VercelResponse) {
-  const listRepository = ListRepository();
-  const findByIdListService = FindByIdListService(listRepository);
-  const updateListService = UpdateListService(listRepository);
-  const deleteListService = DeleteListService(listRepository);
+class ListByIdController {
+  private readonly listRepository;
+  private readonly findByIdListService;
+  private readonly updateListService;
+  private readonly deleteListService;
 
-  const findById = async (
-    requestQuery: VercelRequestQuery
-  ): Promise<VercelResponse> => {
-    const { id } = requestQuery;
+  constructor() {
+    this.listRepository = ListRepository();
+    this.findByIdListService = FindByIdListService(this.listRepository);
+    this.updateListService = UpdateListService(this.listRepository);
+    this.deleteListService = DeleteListService(this.listRepository);
+  }
+
+  @DBConnection()
+  private async findById(request: VercelRequest, response: VercelResponse) {
+    const { id } = request.query;
 
     try {
-      const result = await findByIdListService.execute(String(id));
+      const result = await this.findByIdListService.execute(String(id));
       return handleResponse(HTTP_STATUS_CODES.OK, result, response);
     } catch (error: any) {
       return handleError(error, response);
     }
-  };
+  }
 
-  const update = async (
-    requestQuery: VercelRequestQuery,
-    requestBody: VercelRequestBody
-  ): Promise<VercelResponse> => {
-    const { id } = requestQuery;
-    const { title, description, category } = requestBody;
+  @DBConnection()
+  private async update(request: VercelRequest, response: VercelResponse) {
+    const { id } = request.query;
+    const { title, description, category } = request.body;
 
     try {
-      const result = await updateListService.execute({
+      await isAuthenticated(request, response);
+
+      const result = await this.updateListService.execute({
         id: String(id),
         title,
         description,
@@ -52,41 +54,34 @@ export default function (request: VercelRequest, response: VercelResponse) {
     } catch (error: any) {
       return handleError(error, response);
     }
-  };
+  }
 
-  const deleteById = async (
-    requestQuery: VercelRequestQuery
-  ): Promise<VercelResponse> => {
-    const { id } = requestQuery;
+  @DBConnection()
+  private async deleteById(request: VercelRequest, response: VercelResponse) {
+    const { id } = request.query;
 
     try {
-      const result = await deleteListService.execute(String(id));
+      await isAuthenticated(request, response);
+
+      const result = await this.deleteListService.execute(String(id));
+
       return handleResponse(HTTP_STATUS_CODES.OK, result, response);
     } catch (error: any) {
       return handleError(error, response);
     }
-  };
+  }
 
-  async function handle() {
+  public async handle(request: VercelRequest, response: VercelResponse) {
     if (request.method === "GET") {
-      await database.connect();
-      const result = await findById(request.query);
-      await database.disconnect();
-      return result;
+      return this.findById(request, response);
     }
 
     if (request.method === "PUT") {
-      await database.connect();
-      const result = await update(request.query, request.body);
-      await database.disconnect();
-      return result;
+      return this.update(request, response);
     }
 
     if (request.method === "DELETE") {
-      await database.connect();
-      const result = await deleteById(request.query);
-      await database.disconnect();
-      return result;
+      return this.deleteById(request, response);
     }
 
     return handleResponse(
@@ -95,6 +90,6 @@ export default function (request: VercelRequest, response: VercelResponse) {
       response
     );
   }
-
-  return { handle };
 }
+
+export default new ListByIdController();
