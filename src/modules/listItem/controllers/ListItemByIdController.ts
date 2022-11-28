@@ -1,9 +1,4 @@
-import {
-  VercelRequest,
-  VercelRequestBody,
-  VercelRequestQuery,
-  VercelResponse,
-} from "@vercel/node";
+import { VercelRequest, VercelResponse } from "@vercel/node";
 
 import UpdateListItemService from "../services/UpdateListItemService";
 import DeleteListItemService from "../services/DeleteListItemService";
@@ -12,29 +7,37 @@ import { ListRepository } from "../../list/repositories";
 import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
 import { handleResponse } from "../../../shared/handleResponse";
 import { handleError } from "../../../shared/errors/handleError";
-import { database } from "../../../infra/db/prisma/connection";
+import { isAuthenticated } from "../../../shared/isAuthenticated";
+import { DBConnection } from "../../../shared/decorators/DBConnection";
 
-export default function (request: VercelRequest, response: VercelResponse) {
-  const listRepository = ListRepository();
-  const listItemRepository = ListItemRepository();
-  const updateListItemService = UpdateListItemService(
-    listRepository,
-    listItemRepository
-  );
-  const deleteListItemService = DeleteListItemService(
-    listRepository,
-    listItemRepository
-  );
+class ListItemByIdController {
+  private readonly listRepository;
+  private readonly listItemRepository;
+  private readonly updateListItemService;
+  private readonly deleteListItemService;
 
-  async function update(
-    requestQuery: VercelRequestQuery,
-    requestBody: VercelRequestBody
-  ) {
-    const { id: listId, itemid } = requestQuery;
-    const { title, season, episode, chapter, link, image } = requestBody;
+  constructor() {
+    this.listRepository = ListRepository();
+    this.listItemRepository = ListItemRepository();
+    this.updateListItemService = UpdateListItemService(
+      this.listRepository,
+      this.listItemRepository
+    );
+    this.deleteListItemService = DeleteListItemService(
+      this.listRepository,
+      this.listItemRepository
+    );
+  }
+
+  @DBConnection()
+  private async update(request: VercelRequest, response: VercelResponse) {
+    const { id: listId, itemid } = request.query;
+    const { title, season, episode, chapter, link, image } = request.body;
 
     try {
-      const result = await updateListItemService.execute({
+      await isAuthenticated(request, response);
+
+      const result = await this.updateListItemService.execute({
         listId: String(listId),
         id: String(itemid),
         title,
@@ -51,33 +54,31 @@ export default function (request: VercelRequest, response: VercelResponse) {
     }
   }
 
-  async function deleteById(requestQuery: VercelRequestQuery) {
-    const { id: listId, itemid } = requestQuery;
+  @DBConnection()
+  private async deleteById(request: VercelRequest, response: VercelResponse) {
+    const { id: listId, itemid } = request.query;
 
     try {
-      const result = await deleteListItemService.execute(
+      await isAuthenticated(request, response);
+
+      const result = await this.deleteListItemService.execute(
         String(listId),
         String(itemid)
       );
+
       return handleResponse(HTTP_STATUS_CODES.OK, result, response);
     } catch (error: any) {
       return handleError(error, response);
     }
   }
 
-  async function handle() {
+  public async handle(request: VercelRequest, response: VercelResponse) {
     if (request.method === "PUT") {
-      await database.connect();
-      const result = await update(request.query, request.body);
-      await database.disconnect();
-      return result;
+      return this.update(request, response);
     }
 
     if (request.method === "DELETE") {
-      await database.connect();
-      const result = await deleteById(request.query);
-      await database.disconnect();
-      return result;
+      return this.deleteById(request, response);
     }
 
     return handleResponse(
@@ -86,6 +87,6 @@ export default function (request: VercelRequest, response: VercelResponse) {
       response
     );
   }
-
-  return { handle };
 }
+
+export default new ListItemByIdController();

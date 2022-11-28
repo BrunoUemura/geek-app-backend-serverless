@@ -1,24 +1,29 @@
-import { VercelRequest, VercelResponse, VercelRequestBody } from "@vercel/node";
+import { VercelRequest, VercelResponse } from "@vercel/node";
 
-import { database } from "../../../infra/db/prisma/connection";
 import { handleResponse } from "../../../shared/handleResponse";
 import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
 import { handleError } from "../../../shared/errors/handleError";
 import { UserRepository } from "../repositories";
 import SignInUserService from "../services/SignInUserService";
 import SignUpUserService from "../services/SignUpUserService";
+import { DBConnection } from "../../../shared/decorators/DBConnection";
 
-export default function (request: VercelRequest, response: VercelResponse) {
-  const userRepository = UserRepository();
-  const signInUserService = SignInUserService(userRepository);
-  const signUpUserService = SignUpUserService(userRepository);
+class AuthController {
+  private readonly userRepository;
+  private readonly signInUserService;
+  private readonly signUpUserService;
 
-  async function signInUser({
-    email,
-    password,
-  }: VercelRequestBody): Promise<VercelResponse> {
+  constructor() {
+    this.userRepository = UserRepository();
+    this.signInUserService = SignInUserService(this.userRepository);
+    this.signUpUserService = SignUpUserService(this.userRepository);
+  }
+
+  @DBConnection()
+  private async signInUser(request: VercelRequest, response: VercelResponse) {
+    const { email, password } = request.body;
     try {
-      const user = await signInUserService.execute({
+      const user = await this.signInUserService.execute({
         email,
         password,
       });
@@ -28,13 +33,11 @@ export default function (request: VercelRequest, response: VercelResponse) {
     }
   }
 
-  async function signUpUser({
-    username,
-    email,
-    password,
-  }: VercelRequestBody): Promise<VercelResponse> {
+  @DBConnection()
+  private async signUpUser(request: VercelRequest, response: VercelResponse) {
+    const { username, email, password } = request.body;
     try {
-      const user = await signUpUserService.execute({
+      const user = await this.signUpUserService.execute({
         username,
         email,
         password,
@@ -45,25 +48,15 @@ export default function (request: VercelRequest, response: VercelResponse) {
     }
   }
 
-  async function handle() {
+  public async handle(request: VercelRequest, response: VercelResponse) {
     if (request.method === "POST" && request.url?.includes("/signin")) {
-      await database.connect();
-
-      const result = await signInUser(request.body);
-
-      await database.disconnect();
-      return result;
+      return this.signInUser(request, response);
     }
 
     if (request.method === "POST" && request.url?.includes("/signup")) {
-      await database.connect();
-
-      const result = await signUpUser(request.body);
-
-      await database.disconnect();
-      return result;
+      return this.signUpUser(request, response);
     }
   }
-
-  return { handle };
 }
+
+export default new AuthController();

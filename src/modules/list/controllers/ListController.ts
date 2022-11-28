@@ -1,4 +1,4 @@
-import { VercelRequest, VercelRequestBody, VercelResponse } from "@vercel/node";
+import { VercelRequest, VercelResponse } from "@vercel/node";
 
 import FindAllListService from "../services/FindAllListService";
 import CreateListService from "../services/CreateListService";
@@ -7,63 +7,61 @@ import { UserRepository } from "../../user/repositories";
 import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
 import { handleResponse } from "../../../shared/handleResponse";
 import { handleError } from "../../../shared/errors/handleError";
-import { database } from "../../../infra/db/prisma/connection";
+import { isAuthenticated } from "../../../shared/isAuthenticated";
+import { DBConnection } from "../../../shared/decorators/DBConnection";
 
-export default function (request: VercelRequest, response: VercelResponse) {
-  const listRepository = ListRepository();
-  const userRepository = UserRepository();
-  const findAllListService = FindAllListService(listRepository);
-  const createListService = CreateListService(userRepository, listRepository);
+class ListController {
+  private readonly listRepository;
+  private readonly userRepository;
+  private readonly findAllListService;
+  private readonly createListService;
 
-  const findAll = async (): Promise<VercelResponse> => {
+  constructor() {
+    this.listRepository = ListRepository();
+    this.userRepository = UserRepository();
+    this.findAllListService = FindAllListService(this.listRepository);
+    this.createListService = CreateListService(
+      this.userRepository,
+      this.listRepository
+    );
+  }
+
+  @DBConnection()
+  private async findAll(request: VercelRequest, response: VercelResponse) {
     try {
-      const result = await findAllListService.execute();
+      const result = await this.findAllListService.execute();
       return handleResponse(HTTP_STATUS_CODES.OK, result, response);
     } catch (error: any) {
       return handleError(error, response);
     }
-  };
+  }
 
-  async function create(
-    requestBody: VercelRequestBody
-  ): Promise<VercelResponse> {
-    const { userId, title, description, category } = requestBody;
-
+  @DBConnection()
+  private async create(request: VercelRequest, response: VercelResponse) {
+    const { userId, title, description, category } = request.body;
     try {
-      const result = await createListService.execute({
+      await isAuthenticated(request, response);
+      const result = await this.createListService.execute({
         userId,
         title,
         description,
         category,
       });
-
       return handleResponse(HTTP_STATUS_CODES.OK, result, response);
     } catch (error: any) {
       return handleError(error, response);
     }
   }
 
-  async function handle() {
+  public async handle(request: VercelRequest, response: VercelResponse) {
     if (request.method === "GET") {
-      await database.connect();
-      const result = await findAll();
-      await database.disconnect();
-      return result;
+      return this.findAll(request, response);
     }
 
     if (request.method === "POST") {
-      await database.connect();
-      const result = await create(request.body);
-      await database.disconnect();
-      return result;
+      return this.create(request, response);
     }
-
-    return handleResponse(
-      HTTP_STATUS_CODES.NOT_FOUND,
-      `Requested http method [${request.method}] not available`,
-      response
-    );
   }
-
-  return { handle };
 }
+
+export default new ListController();

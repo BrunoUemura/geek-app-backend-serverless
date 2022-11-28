@@ -1,9 +1,4 @@
-import {
-  VercelRequest,
-  VercelRequestBody,
-  VercelRequestQuery,
-  VercelResponse,
-} from "@vercel/node";
+import { VercelRequest, VercelResponse } from "@vercel/node";
 
 import CreateListItemService from "../services/CreateListItemService";
 import { ListItemRepository } from "../repositories";
@@ -11,25 +6,32 @@ import { ListRepository } from "../../list/repositories";
 import { HTTP_STATUS_CODES } from "../../../shared/constants/httpStatusCodes";
 import { handleResponse } from "../../../shared/handleResponse";
 import { handleError } from "../../../shared/errors/handleError";
-import { database } from "../../../infra/db/prisma/connection";
+import { DBConnection } from "../../../shared/decorators/DBConnection";
+import { isAuthenticated } from "../../../shared/isAuthenticated";
 
-export default function (request: VercelRequest, response: VercelResponse) {
-  const listRepository = ListRepository();
-  const listItemRepository = ListItemRepository();
-  const createListItemService = CreateListItemService(
-    listRepository,
-    listItemRepository
-  );
+class ListItemController {
+  private readonly listRepository;
+  private readonly listItemRepository;
+  private readonly createListItemService;
 
-  async function create(
-    requestQuery: VercelRequestQuery,
-    requestBody: VercelRequestBody
-  ) {
-    const { id } = requestQuery;
-    const { title, season, episode, chapter, link, image } = requestBody;
+  constructor() {
+    this.listRepository = ListRepository();
+    this.listItemRepository = ListItemRepository();
+    this.createListItemService = CreateListItemService(
+      this.listRepository,
+      this.listItemRepository
+    );
+  }
+
+  @DBConnection()
+  private async create(request: VercelRequest, response: VercelResponse) {
+    const { id } = request.query;
+    const { title, season, episode, chapter, link, image } = request.body;
 
     try {
-      const result = await createListItemService.execute({
+      await isAuthenticated(request, response);
+
+      const result = await this.createListItemService.execute({
         listId: String(id),
         title,
         season,
@@ -45,12 +47,9 @@ export default function (request: VercelRequest, response: VercelResponse) {
     }
   }
 
-  async function handle() {
+  public async handle(request: VercelRequest, response: VercelResponse) {
     if (request.method === "POST") {
-      await database.connect();
-      const result = await create(request.query, request.body);
-      await database.disconnect();
-      return result;
+      return this.create(request, response);
     }
 
     return handleResponse(
@@ -59,6 +58,6 @@ export default function (request: VercelRequest, response: VercelResponse) {
       response
     );
   }
-
-  return { handle };
 }
+
+export default new ListItemController();
