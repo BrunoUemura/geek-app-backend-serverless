@@ -7,6 +7,7 @@ import { UserRepository } from '../repositories';
 import SignInUserService from '../services/SignInUserService';
 import SignUpUserService from '../services/SignUpUserService';
 import { DBConnection } from '../../../shared/decorators/DBConnection';
+import { isAuthenticated } from '../../../shared/isAuthenticated';
 
 class AuthController {
   private readonly userRepository;
@@ -48,6 +49,18 @@ class AuthController {
     }
   }
 
+  private async validateToken(
+    request: VercelRequest,
+    response: VercelResponse,
+  ) {
+    try {
+      await isAuthenticated(request, response);
+      return handleResponse(HTTP_STATUS_CODES.OK, null, response);
+    } catch (error: any) {
+      return handleError(error, response);
+    }
+  }
+
   public async handle(request: VercelRequest, response: VercelResponse) {
     if (request.method === 'POST' && request.url?.includes('/signin')) {
       return this.signInUser(request, response);
@@ -55,6 +68,10 @@ class AuthController {
 
     if (request.method === 'POST' && request.url?.includes('/signup')) {
       return this.signUpUser(request, response);
+    }
+
+    if (request.method === 'POST' && request.url?.includes('/validate')) {
+      return this.validateToken(request, response);
     }
   }
 }
