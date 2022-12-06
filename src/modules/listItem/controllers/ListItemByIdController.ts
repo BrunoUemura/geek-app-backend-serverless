@@ -32,7 +32,8 @@ class ListItemByIdController {
   @DBConnection()
   private async update(request: VercelRequest, response: VercelResponse) {
     const { id: listId, itemid } = request.query;
-    const { title, season, episode, chapter, link, image } = request.body;
+    const { title, season, episode, chapter, status, link, image } =
+      request.body;
 
     try {
       await isAuthenticated(request, response);
@@ -44,6 +45,7 @@ class ListItemByIdController {
         season,
         episode,
         chapter,
+        status,
         link,
         image,
       });

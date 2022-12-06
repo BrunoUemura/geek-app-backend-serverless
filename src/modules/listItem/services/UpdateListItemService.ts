@@ -16,6 +16,7 @@ export default function (
     season,
     episode,
     chapter,
+    status,
     link,
     image,
   }: IListItemUpdate): Promise<IListItem> {
@@ -42,6 +43,7 @@ export default function (
       season,
       episode,
       chapter,
+      status,
       link,
       image,
     };

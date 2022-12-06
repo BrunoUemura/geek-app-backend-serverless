@@ -19,6 +19,7 @@ export default function (
     season,
     episode,
     chapter,
+    status,
     image,
     link,
   }: ICreateListItemServiceProps): Promise<void> {
@@ -40,6 +41,7 @@ export default function (
       season,
       episode,
       chapter,
+      status,
       image,
       link,
     };

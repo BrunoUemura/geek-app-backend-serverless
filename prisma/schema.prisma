@@ -23,7 +23,7 @@ model User {
 model List {
   id                String          @id @map("_id")
   user              User            @relation(fields: [userId], references: [id])
-  userId            String          
+  userId            String
   title             String
   category          String
   description       String?
@@ -38,11 +38,12 @@ model List {
 model ListItem {
   id                String          @id @map("_id")
   list              List            @relation(fields: [listId], references: [id])
-  listId            String          
+  listId            String
   title             String
   season            Int?
   episode           Int?
   chapter           Int?
+  status            String?
   link              String?
   image             String?
   createdAt         DateTime        @default(now())

@@ -41,6 +41,7 @@ model ListItem {
   season            Int?
   episode           Int?
   chapter           Int?
+  status            String?
   link              String?
   image             String?
   createdAt         DateTime        @default(now()) @map("created_at")
