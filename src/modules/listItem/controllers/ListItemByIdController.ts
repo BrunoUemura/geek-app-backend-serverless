@@ -36,9 +36,9 @@ class ListItemByIdController {
       request.body;
 
     try {
-      await isAuthenticated(request, response);
-
+      const tokenUserId = await isAuthenticated(request, response);
       const result = await this.updateListItemService.execute({
+        tokenUserId,
         listId: String(listId),
         id: String(itemid),
         title,
@@ -61,9 +61,10 @@ class ListItemByIdController {
     const { id: listId, itemid } = request.query;
 
     try {
-      await isAuthenticated(request, response);
+      const tokenUserId = await isAuthenticated(request, response);
 
       const result = await this.deleteListItemService.execute(
+        tokenUserId,
         String(listId),
         String(itemid),
       );

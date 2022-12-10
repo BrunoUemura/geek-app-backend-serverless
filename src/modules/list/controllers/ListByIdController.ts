@@ -41,9 +41,10 @@ class ListByIdController {
     const { title, description, category } = request.body;
 
     try {
-      await isAuthenticated(request, response);
+      const tokenUserId = await isAuthenticated(request, response);
 
       const result = await this.updateListService.execute({
+        tokenUserId,
         id: String(id),
         title,
         description,
@@ -61,9 +62,11 @@ class ListByIdController {
     const { id } = request.query;
 
     try {
-      await isAuthenticated(request, response);
-
-      const result = await this.deleteListService.execute(String(id));
+      const tokenUserId = await isAuthenticated(request, response);
+      const result = await this.deleteListService.execute(
+        tokenUserId,
+        String(id),
+      );
 
       return handleResponse(HTTP_STATUS_CODES.OK, result, response);
     } catch (error: any) {

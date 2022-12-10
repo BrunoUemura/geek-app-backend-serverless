@@ -10,6 +10,7 @@ export default function (
   listItemRepository: IListItemRepository,
 ) {
   async function execute({
+    tokenUserId,
     id,
     listId,
     title,
@@ -25,6 +26,13 @@ export default function (
     const list = await listRepository.findById(listId);
     if (!list) {
       throw new AppError(HTTP_STATUS_CODES.NOT_FOUND, 'List not found');
+    }
+
+    if (list.userId !== tokenUserId) {
+      throw new AppError(
+        HTTP_STATUS_CODES.UNAUTHORIZED,
+        'User not authorized to update list item',
+      );
     }
 
     logger.info(`[Service]: Found List`);

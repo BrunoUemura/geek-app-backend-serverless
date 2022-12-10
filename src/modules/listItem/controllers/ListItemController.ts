@@ -30,9 +30,10 @@ class ListItemController {
       request.body;
 
     try {
-      await isAuthenticated(request, response);
+      const tokenUserId = await isAuthenticated(request, response);
 
       const result = await this.createListItemService.execute({
+        tokenUserId,
         listId: String(id),
         title,
         season,

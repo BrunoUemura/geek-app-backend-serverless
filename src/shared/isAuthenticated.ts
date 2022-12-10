@@ -25,7 +25,8 @@ export async function isAuthenticated(
 
   try {
     const decodedToken = jwt.verify(token, String(authConfig.jwt.secret));
-    // const { sub } = decodedToken as ITokenPayload;
+    const { sub: userId } = decodedToken as ITokenPayload;
+    return userId;
 
     // request.user = {
     //   id: sub,

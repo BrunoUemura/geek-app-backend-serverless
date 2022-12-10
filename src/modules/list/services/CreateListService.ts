@@ -7,13 +7,16 @@ import { IListRepository } from '../interfaces/IListRepository';
 import { IUserRepository } from '../../user/interfaces/IUserRepository';
 import { CONTEXT_ABBREVIATION } from '../../../shared/constants/contextsAbbreviation';
 
-interface ICreateListServiceProps extends Omit<IListCreate, 'id'> {}
+interface ICreateListServiceProps extends Omit<IListCreate, 'id'> {
+  tokenUserId: string;
+}
 
 export default function (
   userRepository: IUserRepository,
   listRepository: IListRepository,
 ) {
   async function execute({
+    tokenUserId,
     userId,
     title,
     description,
@@ -21,10 +24,16 @@ export default function (
   }: ICreateListServiceProps): Promise<IList> {
     logger.info(`[Service]: Creating list`);
 
-    logger.info(`[Service]: Creating list`);
     const user = await userRepository.findById(userId);
     if (!user) {
       throw new AppError(HTTP_STATUS_CODES.NOT_FOUND, 'User not found');
+    }
+
+    if (userId !== tokenUserId) {
+      throw new AppError(
+        HTTP_STATUS_CODES.UNAUTHORIZED,
+        'User not authorized to create list',
+      );
     }
 
     logger.info(`[Service]: Associated user found`);

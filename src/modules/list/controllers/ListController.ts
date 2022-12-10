@@ -62,8 +62,9 @@ class ListController {
   private async create(request: VercelRequest, response: VercelResponse) {
     const { userId, title, description, category } = request.body;
     try {
-      await isAuthenticated(request, response);
+      const tokenUserId = await isAuthenticated(request, response);
       const result = await this.createListService.execute({
+        tokenUserId,
         userId,
         title,
         description,

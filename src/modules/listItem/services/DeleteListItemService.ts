@@ -9,12 +9,23 @@ export default function (
   listRepository: IListRepository,
   listItemRepository: IListItemRepository,
 ) {
-  async function execute(listId: string, id: string): Promise<IListItem> {
+  async function execute(
+    tokenUserId: string,
+    listId: string,
+    id: string,
+  ): Promise<IListItem> {
     logger.info(`[Service]: Delete List Item by id ${id}`);
     logger.info(`[Service]: Searching for associated List`);
     const list = await listRepository.findById(listId);
     if (!list) {
       throw new AppError(HTTP_STATUS_CODES.NOT_FOUND, 'List not found');
+    }
+
+    if (list.userId !== tokenUserId) {
+      throw new AppError(
+        HTTP_STATUS_CODES.UNAUTHORIZED,
+        'User not authorized to delete list item',
+      );
     }
 
     logger.info(`[Service]: Found List`);
